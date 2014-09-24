@@ -33,25 +33,16 @@ namespace
 
 static double frequency = -1.0;
 
-//
-// Initialize the frequency
-//
 class InitializeFrequency
 {
 public:
 
     InitializeFrequency()
     {
-        //
-        // Get the frequency of performance counters. We also make a call to
-        // QueryPerformanceCounter to ensure it works. If it fails or if the
-        // call to QueryPerformanceFrequency fails, the frequency will remain
-        // set to -1.0 and ftime will be used instead.
-        //
         Int64 v;
-        if (QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&v)))		// 获取高精确度性能计数器的值
+        if (QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&v)))   
         {
-            if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&v)))		// 获得机器内部定时器的时钟频率
+            if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&v)))  
             {
                 frequency = static_cast<double>(v);
             }
@@ -94,40 +85,34 @@ Util::Time::Time(int year, int month, int day, int hour, int min, int sec, int D
 #pragma warning (push)
 #pragma warning (disable: 4127)  // conditional expression constant
 
-	ENSURE_THROW(year >= 1900, Util::IllegalArgumentException);
-	ENSURE_THROW(month >= 1 && month <= 12, Util::IllegalArgumentException);
-	ENSURE_THROW(day >= 1 && day <= 31, Util::IllegalArgumentException);
-	ENSURE_THROW(hour >= 0 && hour <= 23, Util::IllegalArgumentException);
-	ENSURE_THROW(min >= 0 && min <= 59, Util::IllegalArgumentException);
-	ENSURE_THROW(sec >= 0 && sec <= 59, Util::IllegalArgumentException);
+    ENSURE_THROW(year >= 1900, Util::IllegalArgumentException);
+    ENSURE_THROW(month >= 1 && month <= 12, Util::IllegalArgumentException);
+    ENSURE_THROW(day >= 1 && day <= 31, Util::IllegalArgumentException);
+    ENSURE_THROW(hour >= 0 && hour <= 23, Util::IllegalArgumentException);
+    ENSURE_THROW(min >= 0 && min <= 59, Util::IllegalArgumentException);
+    ENSURE_THROW(sec >= 0 && sec <= 59, Util::IllegalArgumentException);
 
 #pragma warning (pop)
 
-	struct tm atm;
+    struct tm atm;
 
-	atm.tm_sec = sec;
-	atm.tm_min = min;
-	atm.tm_hour = hour;
-	atm.tm_mday = day;
-	atm.tm_mon = month - 1;        // tm_mon is 0 based
-	atm.tm_year = year - 1900;     // tm_year is 1900 based
-	atm.tm_isdst = DST;
+    atm.tm_sec = sec;
+    atm.tm_min = min;
+    atm.tm_hour = hour;
+    atm.tm_mday = day;
+    atm.tm_mon = month - 1;        // tm_mon is 0 based
+    atm.tm_year = year - 1900;    // tm_year is 1900 based
+    atm.tm_isdst = DST;
 
-	__time64_t time = _mktime64(&atm);
-	assert(-1 != time);       // indicates an illegal input time
-	if(-1 == time)
-	{
-		throw Util::IllegalArgumentException(__FILE__, __LINE__);
-	}
+    __time64_t time = _mktime64(&atm);
+    assert(-1 != time);       // indicates an illegal input time
+    if(-1 == time)
+    {
+        throw Util::IllegalArgumentException(__FILE__, __LINE__);
+    }
 
-	m_microsec = static_cast<Int64>(time) * UTIL_INT64(1000000);
+    m_microsec = static_cast<Int64>(time) * UTIL_INT64(1000000);
 }
-
-//Time 
-//Util::Time::GetCurrentTime() throw()
-//{
-//	return (Time(::_time64(NULL) * UTIL_INT64(1000000)));
-//}
 
 Time
 Util::Time::Now(Clock clock)
@@ -138,8 +123,6 @@ Util::Time::Now(Clock clock)
 #  if defined(_MSC_VER)
         struct _timeb tb;
         _ftime(&tb);
-		//struct __timeb64 tb;
-		//_ftime64(&tb);
 #  elif defined(__MINGW32__)
         struct timeb tb;
         ftime(&tb);
@@ -207,57 +190,36 @@ Util::Time::Now(Clock clock)
 Time 
 Time::TimeOfToday(size_t hour, size_t minute, size_t second)
 {
-	assert(minute < 60 && second < 60);
+    assert(minute < 60 && second < 60);
 
-	Time base(Now(Realtime) + Hours(24) * ((int)hour / 24));
-	time_t time = static_cast<long>(base.ToMicroSeconds() / 1000000);
+    Time base(Now(Realtime) + Hours(24) * ((int)hour / 24));
+    time_t time = static_cast<long>(base.ToMicroSeconds() / 1000000);
 
-	struct tm* t;
+    struct tm* t;
 #ifdef _WIN32
-	t = localtime(&time);
+    t = localtime(&time);
 #else
-	struct tm tr;
-	localtime_r(&time, &tr);
-	t = &tr;
+    struct tm tr;
+    localtime_r(&time, &tr);
+    t = &tr;
 #endif
-	t->tm_hour = hour % 24;
-	t->tm_min = minute;
-	t->tm_sec = second;
+    t->tm_hour = hour % 24;
+    t->tm_min = minute;
+    t->tm_sec = second;
 
-	return Seconds(mktime(t));
+    return Seconds(mktime(t));
 }
-
-//Time
-//Util::Time::HourOfDay(size_t hour)
-//{
-//	Time base(Now(Realtime) + Hours(24) * ((int)hour / 24));
-//	time_t time = static_cast<long>(base.ToMicroSeconds() / 1000000);
-//
-//	struct tm* t;
-//#ifdef _WIN32
-//	t = localtime(&time);
-//#else
-//	struct tm tr;
-//	localtime_r(&time, &tr);
-//	t = &tr;
-//#endif
-//	t->tm_hour = hour % 24;
-//	t->tm_min = 0;
-//	t->tm_sec = 0;
-//
-//	return Seconds(mktime(t));
-//}
 
 Time
 Util::Time::Hours(size_t t)
 {
-	return Time(t * 3600 * UTIL_INT64(1000000));
+    return Time(t * 3600 * UTIL_INT64(1000000));
 }
 
 Time
 Util::Time::Minutes(size_t t)
 {
-	return Time(t * 60 * UTIL_INT64(1000000));
+    return Time(t * 60 * UTIL_INT64(1000000));
 }
 
 Time
@@ -308,18 +270,18 @@ Util::Time::operator timeval() const
 
 Util::Time::operator tm() const
 {
-	time_t time = static_cast<long>(m_microsec / 1000000);
+    time_t time = static_cast<long>(m_microsec / 1000000);
 
-	struct tm* t;
+    struct tm* t;
 #ifdef _WIN32
-	t = localtime(&time);
+    t = localtime(&time);
 #else
-	struct tm tr;
-	localtime_r(&time, &tr);
-	t = &tr;
+    struct tm tr;
+    localtime_r(&time, &tr);
+    t = &tr;
 #endif
 
-	return *t;
+    return *t;
 }
 
 Int64
@@ -373,14 +335,14 @@ Util::Time::ToDateTime(Clock clock) const
 #endif
 
     char buf[32];
-	if (Realtime == clock)
-	{
-		strftime(buf, sizeof(buf), "%x %H:%M:%S", t);
-	}
-	else
-	{
-		strftime(buf, sizeof(buf), "%H:%M:%S", t);
-	}
+    if (Realtime == clock)
+    {
+        strftime(buf, sizeof(buf), "%x %H:%M:%S", t);
+    }
+    else
+    {
+        strftime(buf, sizeof(buf), "%H:%M:%S", t);
+    }
 
     std::ostringstream os;
     os << buf << ".";
@@ -418,50 +380,50 @@ Util::Time::ToDuration() const
 struct tm* 
 Util::Time::GetGmtTime(struct tm* ptm) const
 {
-	// Ensure ptm is valid
-	ENSURE_THROW(0 != ptm, Util::IllegalArgumentException);
+    // Ensure ptm is valid
+    ENSURE_THROW(0 != ptm, Util::IllegalArgumentException);
 
-	if (0 != ptm)
-	{
-		__time64_t time = m_microsec / 1000000;
-		struct tm tmTemp;
-		errno_t err = _gmtime64_s(&tmTemp, &time);
+    if (0 != ptm)
+    {
+        __time64_t time = m_microsec / 1000000;
+        struct tm tmTemp;
+        errno_t err = _gmtime64_s(&tmTemp, &time);
 
-		// Be sure the call succeeded
-		if(0 != err) 
-		{
-			return 0; 
-		}
+        // Be sure the call succeeded
+        if(0 != err) 
+        {
+            return 0; 
+        }
 
-		*ptm = tmTemp;
-		return ptm;
-	}
+        *ptm = tmTemp;
+        return ptm;
+    }
 
-	return 0;
+    return 0;
 }
 
 struct tm* 
 Util::Time::GetLocalTime(struct tm* ptm) const
 {
-	// Ensure ptm is valid
-	ENSURE_THROW(0 != ptm, Util::IllegalArgumentException);
+    // Ensure ptm is valid
+    ENSURE_THROW(0 != ptm, Util::IllegalArgumentException);
 
-	if (0 != ptm)
-	{
-		__time64_t time = m_microsec / 1000000;
-		struct tm tmTemp;
-		errno_t err = _localtime64_s(&tmTemp, &time);
+    if (0 != ptm)
+    {
+        __time64_t time = m_microsec / 1000000;
+        struct tm tmTemp;
+        errno_t err = _localtime64_s(&tmTemp, &time);
 
-		if(0 != err) 
-		{
-			return NULL;    // indicates that m_time was not initialized!
-		}
+        if(0 != err) 
+        {
+            return NULL;    // indicates that m_time was not initialized!
+        }
 
-		*ptm = tmTemp;
-		return ptm;
-	}
+        *ptm = tmTemp;
+        return ptm;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 #ifdef _WIN32
@@ -469,26 +431,26 @@ Util::Time::GetLocalTime(struct tm* ptm) const
 bool 
 Util::Time::GetAsSystemTime(SYSTEMTIME& timeDest) const throw()
 {
-	struct tm ttm;
-	struct tm* ptm;
+    struct tm ttm;
+    struct tm* ptm;
 
-	ptm = GetLocalTime(&ttm);
+    ptm = GetLocalTime(&ttm);
 
-	if(!ptm) 
-	{
-		return false; 
-	}
+    if(!ptm) 
+    {
+        return false; 
+    }
 
-	timeDest.wYear = (WORD) (1900 + ptm->tm_year);
-	timeDest.wMonth = (WORD) (1 + ptm->tm_mon);
-	timeDest.wDayOfWeek = (WORD) ptm->tm_wday;
-	timeDest.wDay = (WORD) ptm->tm_mday;
-	timeDest.wHour = (WORD) ptm->tm_hour;
-	timeDest.wMinute = (WORD) ptm->tm_min;
-	timeDest.wSecond = (WORD) ptm->tm_sec;
-	timeDest.wMilliseconds = 0;
+    timeDest.wYear = (WORD) (1900 + ptm->tm_year);
+    timeDest.wMonth = (WORD) (1 + ptm->tm_mon);
+    timeDest.wDayOfWeek = (WORD) ptm->tm_wday;
+    timeDest.wDay = (WORD) ptm->tm_mday;
+    timeDest.wHour = (WORD) ptm->tm_hour;
+    timeDest.wMinute = (WORD) ptm->tm_min;
+    timeDest.wSecond = (WORD) ptm->tm_sec;
+    timeDest.wMilliseconds = 0;
 
-	return true;
+    return true;
 }
 
 #endif
@@ -496,77 +458,77 @@ Util::Time::GetAsSystemTime(SYSTEMTIME& timeDest) const throw()
 __time64_t 
 Util::Time::GetTime() const throw()
 {
-	return(m_microsec / 1000000);
+    return(m_microsec / 1000000);
 }
 
 int 
 Util::Time::GetYear() const
 { 
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? (ptm->tm_year) + 1900 : 0 ; 
+    ptm = GetLocalTime(&ttm);
+    return ptm ? (ptm->tm_year) + 1900 : 0 ; 
 }
 
 int 
 Util::Time::GetMonth() const
 { 
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_mon + 1 : 0;
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_mon + 1 : 0;
 }
 
 int 
 Util::Time::GetDay() const
 {
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_mday : 0 ; 
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_mday : 0 ; 
 }
 
 int 
 Util::Time::GetHour() const
 {
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_hour : -1 ; 
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_hour : -1 ; 
 }
 
 int 
 Util::Time::GetMinute() const
 {
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_min : -1 ; 
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_min : -1 ; 
 }
 
 int 
 Util::Time::GetSecond() const
 { 
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_sec : -1 ;
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_sec : -1 ;
 }
 
 int 
 Util::Time::GetDayOfWeek() const
 { 
-	struct tm ttm;
-	struct tm * ptm;
+    struct tm ttm;
+    struct tm * ptm;
 
-	ptm = GetLocalTime(&ttm);
-	return ptm ? ptm->tm_wday + 1 : 0 ;
+    ptm = GetLocalTime(&ttm);
+    return ptm ? ptm->tm_wday + 1 : 0 ;
 }
 
 Time::Time(Int64 usec) :

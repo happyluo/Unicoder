@@ -17,21 +17,19 @@ namespace Base
 class noncopyable  
 {
 public:
-	noncopyable()
-	{
-	}
+    noncopyable()
+    {
+    }
 
-	// May not be virtual! Classes without virtual 
-	// operations also derive from noncopyable.
-	~noncopyable()
-	{
-	}
+    // May not be virtual! Classes without virtual 
+    // operations also derive from noncopyable.
+    ~noncopyable()
+    {
+    }
 
 private:
-	///拷贝函数私有化，禁止拷贝
-	noncopyable(const noncopyable&);
-	///赋值函数私有化，禁止复制
-	const noncopyable& operator =(const noncopyable&);
+    noncopyable(const noncopyable&);
+    const noncopyable& operator =(const noncopyable&);
 };
 }
 

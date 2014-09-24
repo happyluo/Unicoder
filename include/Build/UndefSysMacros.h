@@ -23,49 +23,49 @@
 //
 
 #ifdef major
-#	undef major
+#    undef major
 #endif
 
 #ifdef minor
-#	undef minor
+#    undef minor
 #endif
 
 //#ifdef min
-//#	undef min
+//#    undef min
 //#endif
 //
 //#ifdef max
-//#	undef max
+//#    undef max
 //#endif
 
 #ifdef min
-#	if defined(_MSC_VER) && ! defined(__clang__)
-	UTIL_WARNING("macro min is incompatible with C++.  Try #define NOMINMAX "
-				"before any Windows header. #undefing min")
-#	else
-#	warning: macro min is incompatible with C++.  #undefing min
-#	endif
+#    if defined(_MSC_VER) && ! defined(__clang__)
+    UTIL_WARNING("macro min is incompatible with C++.  Try #define NOMINMAX "
+                "before any Windows header. #undefing min")
+#    else
+#    warning: macro min is incompatible with C++.  #undefing min
+#    endif
 
-#	undef min
+#    undef min
 #endif
 
 #ifdef max
-#	if defined(_MSC_VER) && ! defined(__clang__)
-	UTIL_WARNING("macro max is incompatible with C++.  Try #define NOMINMAX "
-				"before any Windows header. #undefing max")
-#	else
-#	warning: macro max is incompatible with C++.  #undefing max
-#	endif
+#    if defined(_MSC_VER) && ! defined(__clang__)
+    UTIL_WARNING("macro max is incompatible with C++.  Try #define NOMINMAX "
+                "before any Windows header. #undefing max")
+#    else
+#    warning: macro max is incompatible with C++.  #undefing max
+#    endif
 
-#	undef max
+#    undef max
 #endif
 
 #ifdef Yield
-#	undef Yield
+#    undef Yield
 #endif
 
 //#ifdef ERROR
-//#	undef ERROR
+//#    undef ERROR
 //#endif
 
 #endif

@@ -64,18 +64,18 @@
 
 // Put this in the private: declarations for a class to be uncopyable.
 #define DISALLOW_COPY(TypeName) \
-	TypeName(const TypeName&)
+    TypeName(const TypeName&)
 
 // A macro to disallow operator=
 // This should be used in the private: declarations for a class.
 #define DISALLOW_ASSIGN(TypeName)\
-	TypeName& operator=(TypeName const &)
+    TypeName& operator=(TypeName const &)
 
 // A macro to disallow copy constructor and operator= functions
 // This should be used in the private: declarations for a class.
 #define DISALLOW_COPY_AND_ASSIGN(TypeName)\
-	TypeName(TypeName const &);\
-	DISALLOW_ASSIGN(TypeName)
+    TypeName(TypeName const &);\
+    DISALLOW_ASSIGN(TypeName)
 
 // A macro to disallow all the implicit constructors, namely the
 // default constructor, copy constructor and operator= functions.
@@ -84,29 +84,29 @@
 // that wants to prevent anyone from instantiating it. This is
 // especially useful for classes containing only static methods.
 #define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-	TypeName();                                    \
-	DISALLOW_COPY_AND_ASSIGN(TypeName)
+    TypeName();                                    \
+    DISALLOW_COPY_AND_ASSIGN(TypeName)
 
 //
 // calculate data member's offset of struct or class.
 // 
-#define OffsetOf(Type, member)					\
-	reinterpret_cast<size_t>(&reinterpret_cast<Type*>(0)->member)
+#define OffsetOf(Type, member)                    \
+    reinterpret_cast<size_t>(&reinterpret_cast<Type*>(0)->member)
 //
 // calculate struct or class's address by data member's address.
 // 
-#define ContainerOf(memberptr, Type, member)	\
-	reinterpret_cast<Type*>(reinterpret_cast<char*>(memberptr) - OffsetOf(Type, member))
+#define ContainerOf(memberptr, Type, member)    \
+    reinterpret_cast<Type*>(reinterpret_cast<char*>(memberptr) - OffsetOf(Type, member))
 
-#define min_t(Type, x, y) ({			\
-	Type __min1 = (x);					\
-	Type __min2 = (y);					\
-	__min1 < __min2 ? __min1 : __min2; })
+#define min_t(Type, x, y) ({            \
+    Type __min1 = (x);                    \
+    Type __min2 = (y);                    \
+    __min1 < __min2 ? __min1 : __min2; })
 
-#define max_t(Type, x, y) ({			\
-	Type __max1 = (x);					\
-	Type __max2 = (y);					\
-	__max1 > __max2 ? __max1 : __max2; })
+#define max_t(Type, x, y) ({            \
+    Type __max1 = (x);                    \
+    Type __max2 = (y);                    \
+    __max1 > __max2 ? __max1 : __max2; })
 
 //
 //  Workaround for the unfortunate min/max macros defined by some platform headers
@@ -127,14 +127,14 @@
 #  if defined(NO_STD_MIN_MAX) && defined(__cplusplus)
 
 namespace std {
-	template <class Type>
-	inline const Type& min PREVENT_MACRO_SUBSTITUTION (const Type& __a, const Type& __b) {
-		return __b < __a ? __b : __a;
-	}
-	template <class Type>
-	inline const Type& max PREVENT_MACRO_SUBSTITUTION (const Type& __a, const Type& __b) {
-		return  __a < __b ? __b : __a;
-	}
+    template <class Type>
+    inline const Type& min PREVENT_MACRO_SUBSTITUTION (const Type& __a, const Type& __b) {
+        return __b < __a ? __b : __a;
+    }
+    template <class Type>
+    inline const Type& max PREVENT_MACRO_SUBSTITUTION (const Type& __a, const Type& __b) {
+        return  __a < __b ? __b : __a;
+    }
 }
 
 #  endif
@@ -148,16 +148,16 @@ namespace std {
 #define ToLowerChar(X)  (char)tolower((unsigned char)X)
 #define ToUpperChar(X)  (char)toupper((unsigned char)X)
 
-//#define DigitValue(X)  ({								\
-//	unsigned char uc(static_cast<unsigned char>(X));	\
-//	isdigit(uc) ? uc - '0' : -1;						\
+//#define DigitValue(X)  ({                                \
+//    unsigned char uc(static_cast<unsigned char>(X));    \
+//    isdigit(uc) ? uc - '0' : -1;                        \
 //})
 //
-//#define XDigitValue(X)  ({							\
-//	unsigned char uc(static_cast<unsigned char>(X));	\
-//	isxdigit(uc)										\
-//	? (isdigit(uc) ? uc - '0' : toupper(uc) - 'A' + 10)	\
-//	: -1;												\
+//#define XDigitValue(X)  ({                            \
+//    unsigned char uc(static_cast<unsigned char>(X));    \
+//    isxdigit(uc)                                        \
+//    ? (isdigit(uc) ? uc - '0' : toupper(uc) - 'A' + 10)    \
+//    : -1;                                                \
 //})
 
 // The arraysize(arr) macro returns the # of elements in an array arr.
@@ -235,8 +235,8 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 
 #undef ARRAYSIZE_UNSAFE
 #define ARRAYSIZE_UNSAFE(array) \
-	((sizeof(array) / sizeof(*(array))) / \
-	static_cast<size_t>(!(sizeof(array) % sizeof(*(array)))))
+    ((sizeof(array) / sizeof(*(array))) / \
+    static_cast<size_t>(!(sizeof(array) % sizeof(*(array)))))
 //#define ARRAYSIZE_UNSAFE(array)  (size_t)(sizeof(array) / sizeof(array[0]))
 
 
@@ -247,9 +247,9 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 // declare such constants.
 
 #ifdef NO_INCLASS_MEMBER_INITIALIZATION
-#	define STATIC_CONSTANT(type, assignment) enum { assignment }
+#    define STATIC_CONSTANT(type, assignment) enum { assignment }
 #else
-#	define STATIC_CONSTANT(type, assignment) static const type assignment
+#    define STATIC_CONSTANT(type, assignment) static const type assignment
 #endif
 
 // MSVC "deprecates" snprintf and issues warnings wherever it is used.  In
@@ -258,32 +258,32 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 // function in order to achieve that.  We use macro definition here because
 // snprintf is a variadic function.
 #if _MSC_VER >= 1400 && !OS_WINDOWS_MOBILE
-//	MSVC 2005 and above support variadic macros.
-#	define snprintf(buffer, size, format, ...) \
-	_snprintf_s(buffer, size, size, format, __VA_ARGS__)
+//    MSVC 2005 and above support variadic macros.
+#    define snprintf(buffer, size, format, ...) \
+    _snprintf_s(buffer, size, size, format, __VA_ARGS__)
 #elif defined(_MSC_VER)
-//	Windows CE does not define _snprintf_s and MSVC prior to 2005 doesn't
-//	complain about _snprintf.
-#	define snprintf _snprintf
+//    Windows CE does not define _snprintf_s and MSVC prior to 2005 doesn't
+//    complain about _snprintf.
+#    define snprintf _snprintf
 #else
-#	define snprintf snprintf
+#    define snprintf snprintf
 #endif
 
 #ifdef _MSC_VER
-#	define strtoll  _strtoi64
-#	define strtoull _strtoui64
+#    define strtoll  _strtoi64
+#    define strtoull _strtoui64
 #elif defined(__DECCXX) && defined(__osf__)
 // HP C++ on Tru64 does not have strtoll, but strtol is already 64-bit.
-#	define strtoll strtol
-#	define strtoull strtoul
+#    define strtoll strtol
+#    define strtoull strtoul
 #endif
 
 #define ENSURE_THROW(expr, exception) do     \
 {                                            \
-	if (!(expr))                             \
-	{                                        \
-		throw exception(__FILE__, __LINE__); \
-	}                                        \
+    if (!(expr))                             \
+    {                                        \
+        throw exception(__FILE__, __LINE__); \
+    }                                        \
 } while (0);
 
 #define CONCAT1(X, Y) X##Y
@@ -296,26 +296,26 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 // implementation here.  It is not guaranteed that assignment is a copy, so the
 // StringUtil.VariableArgsFunc unit test tests this capability.
 #if defined(_MSC_VER)
-#	define VA_COPY(dest, src) ((dest) = (src))
+#    define VA_COPY(dest, src) ((dest) = (src))
 #else
-#	define VA_COPY(dest, src) (va_copy(dest, src))
+#    define VA_COPY(dest, src) (va_copy(dest, src))
 #endif
 
 // Define an OS-neutral wrapper for shared library entry points
 #if defined(_WIN32)
-#	define API_CALL __stdcall
+#    define API_CALL __stdcall
 #else
-#	define API_CALL
+#    define API_CALL
 #endif
 
 #ifndef __has_feature
-#	define __has_feature(expr) 0
+#    define __has_feature(expr) 0
 #endif
 
 #ifdef _MSC_VER
-#	define UTIL_INLINE_VISIBILITY __forceinline
+#    define UTIL_INLINE_VISIBILITY __forceinline
 #else // MinGW GCC and Clang
-#	define UTIL_INLINE_VISIBILITY __attribute__ ((__always_inline__))
+#    define UTIL_INLINE_VISIBILITY __attribute__ ((__always_inline__))
 #endif
 
 // The following enum should be used only as a constructor argument to indicate
@@ -340,6 +340,6 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // it is leaked so that its destructors are not called at exit. If you need
 // thread-safe initialization, use base/lazy_instance.h instead.
 #define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
-	static type& name = *new type arguments
+    static type& name = *new type arguments
 
 #endif

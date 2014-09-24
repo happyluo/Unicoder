@@ -7,10 +7,20 @@
 //
 // **********************************************************************
 
+// **********************************************************************
+//
+// Copyright (c) 2010-2014 Bernard Luo. All rights reserved.
+//
+// <Email: luo (dot) xiaowei (at) hotmail (dot) com>
+//
+// **********************************************************************
+
+
 #ifndef UTIL_ICONV_STRING_CONVERTER
 #define UTIL_ICONV_STRING_CONVERTER
 
 #include <Unicoder/StringConverter.h>
+#include <Build/UndefSysMacros.h>
 
 #include <algorithm>
 #include <iconv.h>
@@ -91,38 +101,32 @@ template<typename charT>
 IconvStringConverter<charT>::IconvStringConverter(const char* internalCode) :
     m_internalCode(internalCode)
 {
-	//
-	// Verify that iconv supports conversion to/from internalCode
-	//
-	try
-	{
-		Close(CreateDescriptors());
-	}
-	catch(const Util::StringConversionException& sce)
-	{
-		throw Util::InitializationException(__FILE__, __LINE__, sce.m_reason);
-	}
+    try
+    {
+        Close(CreateDescriptors());
+    }
+    catch(const Util::StringConversionException& sce)
+    {
+        throw Util::InitializationException(__FILE__, __LINE__, sce.m_reason);
+    }
 
-	//
-	// Create thread-specific key
-	//
 #ifdef _WIN32
-	m_key = TlsAlloc();
-	if (m_key == TLS_OUT_OF_INDEXES)
-	{
-		throw Util::ThreadSyscallException(__FILE__, __LINE__, GetLastError());
-	}
+    m_key = TlsAlloc();
+    if (m_key == TLS_OUT_OF_INDEXES)
+    {
+        throw Util::ThreadSyscallException(__FILE__, __LINE__, GetLastError());
+    }
 #else
-#	ifdef __SUNPRO_CC
-	int rs = pthread_key_create(&m_key, reinterpret_cast<PthreadKeyDestructor>(&CleanupKey));
-#	else
-	int rs = pthread_key_create(&m_key, &CleanupKey);
-#	endif
+#    ifdef __SUNPRO_CC
+    int rs = pthread_key_create(&m_key, reinterpret_cast<PthreadKeyDestructor>(&CleanupKey));
+#    else
+    int rs = pthread_key_create(&m_key, &CleanupKey);
+#    endif
 
-	if (rs != 0)
-	{
-		throw Util::ThreadSyscallException(__FILE__, __LINE__, rs);
-	}
+    if (rs != 0)
+    {
+        throw Util::ThreadSyscallException(__FILE__, __LINE__, rs);
+    }
 #endif
 }
 
@@ -236,9 +240,6 @@ IconvStringConverter<charT>::ToUTF8(const charT* sourceStart, const charT* sourc
 { 
     iconv_t cd = GetDescriptors().second;
     
-    //
-    // Reset cd
-    //
 #ifdef NDEBUG
     iconv(cd, 0, 0, 0, 0);
 #else
@@ -255,9 +256,6 @@ IconvStringConverter<charT>::ToUTF8(const charT* sourceStart, const charT* sourc
     char* outbuf  = 0;
   
     size_t count = 0; 
-    //
-    // Loop while we need more buffer space
-    //
     do
     {
         size_t howMany = std::max(inbytesleft, size_t(4));
@@ -289,9 +287,6 @@ IconvStringConverter<charT>::FromUTF8(const Util::Byte* sourceStart, const Util:
 {
     iconv_t cd = GetDescriptors().first;
     
-    //
-    // Reset cd
-    //
 #ifdef NDEBUG
     iconv(cd, 0, 0, 0, 0);
 #else
@@ -306,9 +301,6 @@ IconvStringConverter<charT>::FromUTF8(const Util::Byte* sourceStart, const Util:
 #endif
     size_t inbytesleft = sourceEnd - sourceStart;
 
-    //
-    // Result buffer
-    //
     char* buf = 0;
     size_t bufsize = 0;
 
@@ -317,9 +309,6 @@ IconvStringConverter<charT>::FromUTF8(const Util::Byte* sourceStart, const Util:
 
     size_t count = 0;
 
-    //
-    // Loop while we need more buffer space
-    //
     do
     {
         size_t increment = std::max(inbytesleft * sizeof(wchar_t), size_t(8));

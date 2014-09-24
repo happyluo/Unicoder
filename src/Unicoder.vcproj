@@ -172,22 +172,6 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\Unicoder\ConvertUTF.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Unicoder\ConvertUTF.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Unicoder\StringConverter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Unicoder\Unicode.cpp"
-				>
-			</File>
 			<Filter
 				Name="Util"
 				>
@@ -217,6 +201,26 @@
 				</File>
 				<File
 					RelativePath=".\Util\Time.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Unicoder"
+				>
+				<File
+					RelativePath=".\Unicoder\ConvertUTF.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Unicoder\ConvertUTF.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Unicoder\StringConverter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Unicoder\Unicode.cpp"
 					>
 				</File>
 			</Filter>

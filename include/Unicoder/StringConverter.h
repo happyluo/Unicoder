@@ -1,18 +1,27 @@
 // **********************************************************************
 //
+// Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+// **********************************************************************
+//
 // Copyright (c) 2010-2014 Bernard Luo. All rights reserved.
 //
 // <Email: luo (dot) xiaowei (at) hotmail (dot) com>
 //
 // **********************************************************************
 
-#ifndef	UTIL_STRING_CONVERTER_H
+#ifndef UTIL_STRING_CONVERTER_H
 #define UTIL_STRING_CONVERTER_H
 
+#include <Util/Config.h>
 #include <Util/Exception.h>
 #include <Util/Shared.h>
 #include <Util/SharedPtr.h>
-#include <Unicoder/Config.h>
 #include <Unicoder/Unicode.h>
 
 #include <string>
@@ -90,7 +99,7 @@ class UTIL_API WindowsStringConverter : public StringConverter
 {
 public:
 
-	explicit WindowsStringConverter(const std::string& internalCode);
+    explicit WindowsStringConverter(const std::string& internalCode);
     explicit WindowsStringConverter(unsigned int codepage = GetACP());
 
     virtual Byte* ToUTF8(const char*, const char*, UTF8Buffer&) const;
@@ -98,7 +107,7 @@ public:
     virtual void FromUTF8(const Byte*, const Byte*, std::string& target) const;
 
 private:
-	int getCodePage(const std::string& internalCode);
+    int getCodePage(const std::string& internalCode);
 
     unsigned int m_codePage;
     UnicodeWstringConverter m_unicodeWstringConverter;
@@ -127,20 +136,20 @@ class UTIL_API StringConversionException : public Exception
 {
 public:
 
-	StringConversionException(const char* file, int line);
-	StringConversionException(const char* file, int line, const std::string& reason);
-	virtual std::string Name() const;
-	virtual void Print(std::ostream& out) const;
-	virtual StringConversionException* Clone() const;
-	virtual void Throw() const;
+    StringConversionException(const char* file, int line);
+    StringConversionException(const char* file, int line, const std::string& reason);
+    virtual std::string Name() const;
+    virtual void Print(std::ostream& out) const;
+    virtual StringConversionException* Clone() const;
+    virtual void Throw() const;
 
-	const std::string& Reason() const;
+    const std::string& Reason() const;
 
-	std::string m_reason;
+    std::string m_reason;
 
 private:
 
-	static const char* m_name;    
+    static const char* m_name;    
 };
 
 }

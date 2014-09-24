@@ -11,11 +11,11 @@
 #include <Util/ScopedArray.h>
 
 #ifndef _WIN32
-#include <Util/IconvStringConverter.h>
+#    include <Util/IconvStringConverter.h>
 #endif
 
 #ifdef __MINGW32__
-#  include <limits.h>
+#    include <limits.h>
 #endif
 
 using namespace Util;
@@ -134,7 +134,7 @@ UnicodeWstringConverter::ToUTF8(const wchar_t* sourceStart,
 
 void 
 UnicodeWstringConverter::FromUTF8(const Byte* sourceStart, 
-								  const Byte* sourceEnd,
+                                  const Byte* sourceEnd,
                                   wstring& target) const
 {
     if (sourceStart == sourceEnd)
@@ -168,46 +168,46 @@ UnicodeWstringConverter::FromUTF8(const Byte* sourceStart,
 /// WindowsStringConverter
 int WindowsStringConverter::getCodePage(const std::string& internalCode)
 {
-	std::string codeName = Util::String::ToUpper(internalCode);
-	if (Util::String::Match(codeName, "GB*", true))
-	{
-		codeName = "WINDOWS-936";
-	}
-	
-	static const string prefix("WINDOWS-");
-	if (!Util::String::Match(codeName, "WINDOWS-*", false))
-	{
-		return -1;
-	}
+    std::string codeName = Util::String::ToUpper(internalCode);
+    if (Util::String::Match(codeName, "GB*", true))
+    {
+        codeName = "WINDOWS-936";
+    }
+    
+    static const string prefix("WINDOWS-");
+    if (!Util::String::Match(codeName, "WINDOWS-*", false))
+    {
+        return -1;
+    }
 
-	int index = prefix.size();
-	int codePage = 0;
+    int index = prefix.size();
+    int codePage = 0;
 
-	for (; codeName[index]; index++) 
-	{
-		static const char digits[] = "0123456789";
-		const char *s = strchr(digits, codeName[index]);
-		if (!s)
-		{
-			return -1;
-		}
-		codePage *= 10;
-		codePage += (int)(s - digits);
-		if (codePage >= 0x10000)
-		{
-			return -1;
-		}
-	}
+    for (; codeName[index]; index++) 
+    {
+        static const char digits[] = "0123456789";
+        const char *s = strchr(digits, codeName[index]);
+        if (!s)
+        {
+            return -1;
+        }
+        codePage *= 10;
+        codePage += (int)(s - digits);
+        if (codePage >= 0x10000)
+        {
+            return -1;
+        }
+    }
 
-	return codePage;
+    return codePage;
 }
 
 WindowsStringConverter::WindowsStringConverter(const std::string& internalCode)
 {
-	if (-1 == (m_codePage = getCodePage(internalCode)))
-	{
-		throw StringConversionException(__FILE__, __LINE__, "Unknow Code Page: " + internalCode);
-	}
+    if (-1 == (m_codePage = getCodePage(internalCode)))
+    {
+        throw StringConversionException(__FILE__, __LINE__, "Unknow Code Page: " + internalCode);
+    }
 }
 
 WindowsStringConverter::WindowsStringConverter(unsigned int codepage) :
@@ -328,13 +328,13 @@ Util::UTF8ToNative(const Util::StringConverterPtr& converter, const string& str)
 //////////////////////////////////////////////////////////////////////////
 /// StringConversionException
 Util::StringConversionException::StringConversionException(const char *file, int line) :
-	Exception(file, line)
+    Exception(file, line)
 {
 }
 
 Util::StringConversionException::StringConversionException(
-	const char *file, int line, const std::string& reason) :
-	Exception(file, line), m_reason(reason)
+    const char *file, int line, const std::string& reason) :
+    Exception(file, line), m_reason(reason)
 {
 }
 const char* Util::StringConversionException::m_name = "Util::StringConversionException";
@@ -342,32 +342,32 @@ const char* Util::StringConversionException::m_name = "Util::StringConversionExc
 string
 Util::StringConversionException::Name() const
 {
-	return m_name;
+    return m_name;
 }
 
 void
 Util::StringConversionException::Print(ostream& out) const
 {
-	Exception::Print(out);
-	out << ": " << m_reason;
+    Exception::Print(out);
+    out << ": " << m_reason;
 }
 
 Util::StringConversionException*
 Util::StringConversionException::Clone() const
 {
-	return new StringConversionException(*this);
+    return new StringConversionException(*this);
 }
 
 void
 Util::StringConversionException::Throw() const
 {
-	throw *this;
+    throw *this;
 }
 
 const std::string&
 Util::StringConversionException::Reason() const
 {
-	return m_reason;
+    return m_reason;
 }
 
 }

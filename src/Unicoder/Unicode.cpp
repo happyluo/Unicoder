@@ -1,5 +1,14 @@
 // **********************************************************************
 //
+// Copyright (c) 2003-2012 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+// **********************************************************************
+//
 // Copyright (c) 2010-2014 Bernard Luo. All rights reserved.
 //
 // <Email: luo (dot) xiaowei (at) hotmail (dot) com>

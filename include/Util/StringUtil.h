@@ -10,9 +10,8 @@
 #define UTIL_STRING_UTIL_H
 
 #include <string>
-//#include <vector>
-//#include <algorithm>
 #include <Util/Config.h>
+//#include <Util/StaticAssert.h>
 #include <Util/ErrorToString.h>
 
 UTIL_BEGIN
@@ -20,239 +19,220 @@ UTIL_BEGIN
 class UTIL_API String : public std::string
 {
 public:
-	String();
+    String();
 
-	~String();
+    ~String();
 
-	String(const String& other);
+    String(const String& other);
 
-	String(const std::string& src);
+    String(const std::string& src);
 
-	String(const String& src, size_type i, size_type n=npos);
+    String(const String& src, size_type i, size_type n=npos);
 
-	String(const char* src, size_type n);
+    String(const char* src, size_type n);
 
-	String(const char* src);
+    String(const char* src);
 
-	String(size_type n, char c);
+    String(size_type n, char c);
 
-	template <class In> String(In pbegin, In pend);
-
-	String ToUTF8(const std::string& internalCode = "local") const;
-
-	static String ToUTF8(const String& src, const std::string& internalCode = "local");
-
-	std::wstring ToWString(const std::string& internalCode = "local") const;
-
-	static std::wstring ToWString(const String& src, const std::string& internalCode = "local");
+    template <class In> String(In pbegin, In pend);
 
 #ifdef _WIN32
-	// Creates a UTF-16 wide string from the given ANSI string, allocating
-	// memory using new. The caller is responsible for deleting the return
-	// value using delete[]. Returns the wide string, or NULL if the
-	// input is NULL.
-	static LPCWSTR AnsiToUTF16(const char* ansi);
+    // Creates a UTF-16 wide string from the given ANSI string, allocating
+    // memory using new. The caller is responsible for deleting the return
+    // value using delete[]. Returns the wide string, or NULL if the
+    // input is NULL.
+    static LPCWSTR AnsiToUTF16(const char* ansi);
 
-	// Creates an ANSI string from the given wide string, allocating
-	// memory using new. The caller is responsible for deleting the return
-	// value using delete[]. Returns the ANSI string, or NULL if the
-	// input is NULL.
-	static const char* UTF16ToAnsi(LPCWSTR utf16_str);
+    // Creates an ANSI string from the given wide string, allocating
+    // memory using new. The caller is responsible for deleting the return
+    // value using delete[]. Returns the ANSI string, or NULL if the
+    // input is NULL.
+    static const char* UTF16ToAnsi(LPCWSTR utf16_str);
 #endif
 
-	//operator std::string&()
-	//{
-	//	return *this;
-	//}
+    //
+    // Add escape sequences (like "\n", or "\0xxx") to make a string
+    // readable in ASCII.
+    //
+    static std::string EscapeString(const std::string&, const std::string&);
 
-	//operator const std::string&() const
-	//{
-	//	return const_cast<const std::string&>(
-	//		const_cast<Util::String*>(this)->operator std::string&());
-	//}
+    //
+    // Remove escape sequences added by escapeString. Throws IllegalArgumentException
+    // for an invalid input string.
+    //
+    static std::string UnescapeString(const std::string&, std::string::size_type, std::string::size_type);
 
-	//
-	// Add escape sequences (like "\n", or "\0xxx") to make a string
-	// readable in ASCII.
-	//
-	static std::string EscapeString(const std::string&, const std::string&);
+    //
+    // Split a string using the given delimiters. Considers single and double quotes;
+    // returns false for unbalanced quote, true otherwise.
+    //
+    static bool SplitString(const std::string& str, const std::string& delim, std::vector<std::string>& result, bool keepblank = false);
 
-	//
-	// Remove escape sequences added by escapeString. Throws IllegalArgumentException
-	// for an invalid input string.
-	//
-	static std::string UnescapeString(const std::string&, std::string::size_type, std::string::size_type);
+    //
+    // Join a list of strings using the given delimiter. 
+    //
+    static std::string JoinString(const std::vector<std::string>& values, const std::string& delimiter);
 
-	//
-	// Split a string using the given delimiters. Considers single and double quotes;
-	// returns false for unbalanced quote, true otherwise.
-	//
-	static bool SplitString(const std::string& str, const std::string& delim, std::vector<std::string>& result, bool keepblank = false);
+    //
+    // Trim white space
+    //
+    static std::string Trim(const std::string& src);
 
-	//
-	// Join a list of strings using the given delimiter. 
-	//
-	static std::string JoinString(const std::vector<std::string>& values, const std::string& delimiter);
+    //
+    // If a single or double quotation mark is found at the start
+    // position, then the position of the matching closing quote is
+    // returned. If no quotation mark is found at the start position, then
+    // 0 is returned. If no matching closing quote is found, then
+    // std::string::npos is returned.
+    //
+    static std::string::size_type CheckQuote(const std::string&, std::string::size_type = 0);
 
-	//
-	// Trim white space
-	//
-	static std::string Trim(const std::string& src);
+    static std::string::size_type ExistQuote(const std::string&, std::string::size_type = 0);
 
-	//
-	// If a single or double quotation mark is found at the start
-	// position, then the position of the matching closing quote is
-	// returned. If no quotation mark is found at the start position, then
-	// 0 is returned. If no matching closing quote is found, then
-	// std::string::npos is returned.
-	//
-	static std::string::size_type CheckQuote(const std::string&, std::string::size_type = 0);
+    //
+    // Match `s' against the pattern `pat'. A * in the pattern acts
+    // as a wildcard: it matches any non-empty sequence of characters
+    // other than a period (`.'). We match by hand here because
+    // it's portable across platforms (whereas regex() isn't).
+    //
+    static bool Match(const std::string& s, const std::string& pat, bool = false);
 
-	static std::string::size_type ExistQuote(const std::string&, std::string::size_type = 0);
+    //
+    // Translating both the two-character sequence #xD #xA and any #xD that is not followed by #xA to 
+    // a single #xA character.
+    //    LF  (Line feed, '\n', 0x0A, 10 in decimal)  
+    //    CR (Carriage return, '\r', 0x0D, 13 in decimal) 
+    //
+    static std::string TranslatingCR2LF(const std::string& src);
 
-	//
-	// Match `s' against the pattern `pat'. A * in the pattern acts
-	// as a wildcard: it matches any non-empty sequence of characters
-	// other than a period (`.'). We match by hand here because
-	// it's portable across platforms (whereas regex() isn't).
-	//
-	static bool Match(const std::string& s, const std::string& pat, bool = false);
+    //static std::string ToHexString(unsigned long n, bool bupper = false);
 
-	//
-	// Translating both the two-character sequence #xD #xA and any #xD that is not followed by #xA to 
-	// a single #xA character.
-	//	LF  (Line feed, '\n', 0x0A, 10 in decimal)  
-	//	CR (Carriage return, '\r', 0x0D, 13 in decimal) 
-	//
-	static std::string TranslatingCR2LF(const std::string& src);
+    template <typename T>
+    static inline
+    std::string ToHexString(T n, bool bupper = false);
 
-	//static std::string ToHexString(unsigned long n, bool bupper = false);
+    //static std::string ToOctalString(unsigned long n)
 
-	template <typename T>
-	static inline
-	std::string ToHexString(T n, bool bupper = false);
+    template <typename T>
+    static inline
+    std::string ToOctalString(T n);
 
-	//static std::string ToOctalString(unsigned long n)
+    //static std::string ToBinaryString(unsigned long n);
 
-	template <typename T>
-	static inline
-	std::string ToOctalString(T n);
+    template <typename T>
+    static inline
+    std::string ToBinaryString(T n);
 
-	//static std::string ToBinaryString(unsigned long n);
+    //
+    // Functions to convert to lower/upper case. These functions accept
+    // UTF8 string/characters but ignore non ASCII characters. Unlike, the
+    // C methods, these methods are not local dependent.
+    //
+    static std::string ToLower(const std::string&);
+    static std::string ToUpper(const std::string&);
 
-	template <typename T>
-	static inline
-	std::string ToBinaryString(T n);
+    static unsigned long Hash(const std::string&);
 
-	//
-	// Functions to convert to lower/upper case. These functions accept
-	// UTF8 string/characters but ignore non ASCII characters. Unlike, the
-	// C methods, these methods are not local dependent.
-	//
-	static std::string ToLower(const std::string&);
-	static std::string ToUpper(const std::string&);
+    //
+    // Remove all whitespace from a string
+    //
+    static std::string RemoveWhitespace(const std::string&);
 
-	static unsigned long Hash(const std::string&);
+    //////////////////////////////////////////////////////////////////////////
+    /// string & data convert
+    //
+    // Portable strtoll/_strtoi64
+    //
+    static Util::Int64 ToInt64(const char* s, char** endptr, int base);
 
-	//
-	// Remove all whitespace from a string
-	//
-	static std::string RemoveWhitespace(const std::string&);
+    //
+    // ToInt64 converts a string into a signed 64-bit integer.
+    // It's a simple wrapper around ToInt64.
+    //
+    // Semantics:
+    //
+    // - Ignore leading whitespace
+    //
+    // - If the string starts with '0', parse as octal
+    //
+    // - If the string starts with "0x" or "0X", parse as hexadecimal
+    //
+    // - Otherwise, parse as decimal
+    //
+    // - return value == true indicates a successful conversion and result contains the converted value
+    // - return value == false indicates an unsuccessful conversion:
+    //      - result == 0 indicates that no digits were available for conversion
+    //      - result == "Int64 Min" or result == "Int64 Max" indicate underflow or overflow.
+    //
+    static  bool ToInt64(const std::string& s,  Util::Int64& result);
 
-	//////////////////////////////////////////////////////////////////////////
-	/// string & data convert
-	//
-	// Portable strtoll/_strtoi64
-	//
-	static Util::Int64 ToInt64(const char* s, char** endptr, int base);
+    static unsigned long ToULong(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
 
-	//
-	// ToInt64 converts a string into a signed 64-bit integer.
-	// It's a simple wrapper around ToInt64.
-	//
-	// Semantics:
-	//
-	// - Ignore leading whitespace
-	//
-	// - If the string starts with '0', parse as octal
-	//
-	// - If the string starts with "0x" or "0X", parse as hexadecimal
-	//
-	// - Otherwise, parse as decimal
-	//
-	// - return value == true indicates a successful conversion and result contains the converted value
-	// - return value == false indicates an unsuccessful conversion:
-	//      - result == 0 indicates that no digits were available for conversion
-	//      - result == "Int64 Min" or result == "Int64 Max" indicate underflow or overflow.
-	//
-	static  bool ToInt64(const std::string& s,  Util::Int64& result);
+    static long ToLong(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
 
-	static unsigned long ToULong(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
+    static double ToDouble(const std::string& strval, size_t* endindex = 0, int precision = 6);
 
-	static long ToLong(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
+    template <typename T>
+    static inline
+    T ToData(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
 
-	static double ToDouble(const std::string& strval, size_t* endindex = 0, int precision = 6);
+    static std::string ToString(unsigned long n);
 
-	template <typename T>
-	static inline
-	T ToData(const std::string& strval, size_t* endindex = 0, unsigned int base = 10);
+    static std::string ToString(long n);
 
-	static std::string ToString(unsigned long n);
+    //
+    // Determines if a string is a number of not.
+    //
+    static  bool IsNumber(const std::string& s, bool* isdecimal);
 
-	static std::string ToString(long n);
+    //
+    // Skip leading none digit character, get the first number in string.
+    //
+    static  int GetIntInString(const char* s, char** endptr, int base);
 
-	//
-	// Determines if a string is a number of not.
-	//
-	static  bool IsNumber(const std::string& s, bool* isdecimal);
+    static const Util::Byte* FindStringInBuffer(Util::Byte* pBuff, size_t iBuffSize, const std::string& strSearch);
 
-	//
-	// Skip leading none digit character, get the first number in string.
-	//
-	static  int GetIntInString(const char* s, char** endptr, int base);
+    //
+    // Swap lhs and rhs's value
+    //
+    static inline void Swap(unsigned char* lhs, unsigned char* rhs);
 
-	static const Util::Byte* FindStringInBuffer(Util::Byte* pBuff, size_t iBuffSize, const std::string& strSearch);
+    //
+    // Reverse elements in [begin, end)
+    //
+    static inline void ReverseBuffer(unsigned char* begin, unsigned char* end);
 
-	//
-	// Swap lhs and rhs's value
-	//
-	static inline void Swap(unsigned char* lhs, unsigned char* rhs);
+    static std::string BytesToString(const Util::Byte* src, size_t size);
+    static std::string BytesToString(const Util::ByteSeq& bytes);
+    static Util::ByteSeq StringToBytes(const std::string&);
 
-	//
-	// Reverse elements in [begin, end)
-	//
-	static inline void ReverseBuffer(unsigned char* begin, unsigned char* end);
+    //
+    // Hex-dump at most 16 bytes starting at offset from a memory area of size
+    // bytes.  Return the number of bytes actually dumped.
+    //
+    static size_t HexDumpLine(const void* ptr, size_t offset, size_t size, std::string& line, size_t linelength = 16);
 
-	static std::string BytesToString(const Util::Byte* src, size_t size);
-	static std::string BytesToString(const Util::ByteSeq& bytes);
-	static Util::ByteSeq StringToBytes(const std::string&);
+    template <typename OutIt>
+    static inline
+    void HexDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 16*/);
 
-	//
-	// Hex-dump at most 16 bytes starting at offset from a memory area of size
-	// bytes.  Return the number of bytes actually dumped.
-	//
-	static size_t HexDumpLine(const void* ptr, size_t offset, size_t size, std::string& line, size_t linelength = 16);
+    static std::string HexDump(const void* ptr, size_t size, size_t linelength = 16);
 
-	template <typename OutIt>
-	static inline
-	void HexDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 16*/);
+    static std::string HexStringToBuffer(const std::string &hexString, std::string &buffer, const std::string& delimiter = ",");
 
-	static std::string HexDump(const void* ptr, size_t size, size_t linelength = 16);
+    static size_t BinDumpLine(const void* ptr, size_t offset, size_t size, std::string& line, size_t linelength = 8);
 
-	static std::string HexStringToBuffer(const std::string &hexString, std::string &buffer, const std::string& delimiter = ",");
+    template <typename OutIt>
+    static inline
+    void BinDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 8*/);
 
-	static size_t BinDumpLine(const void* ptr, size_t offset, size_t size, std::string& line, size_t linelength = 8);
+    static std::string BinDump(const void* ptr, size_t size, size_t linelength = 8);
 
-	template <typename OutIt>
-	static inline
-	void BinDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 8*/);
-
-	static std::string BinDump(const void* ptr, size_t size, size_t linelength = 8);
-
-	// If *pstr starts with the given prefix, modifies *pstr to be right
-	// past the prefix and returns true; otherwise leaves *pstr unchanged
-	// and returns false.  None of pstr, *pstr, and prefix can be NULL.
-	static bool SkipPrefix(const char* prefix, const char** pstr);
+    // If *pstr starts with the given prefix, modifies *pstr to be right
+    // past the prefix and returns true; otherwise leaves *pstr unchanged
+    // and returns false.  None of pstr, *pstr, and prefix can be NULL.
+    static bool SkipPrefix(const char* prefix, const char** pstr);
 };
 
 template <class In>
@@ -280,62 +260,62 @@ template <typename T>
 inline // static
 std::string String::ToHexString(T n, bool bupper/* = false*/)
 {
-	std::string s;
-	size_t size = sizeof(T) * 2;
-	s.resize(size);
-	std::string::size_type charPos = size;
+    std::string s;
+    size_t size = sizeof(T) * 2;
+    s.resize(size);
+    std::string::size_type charPos = size;
 
-	const int radix = 1 << 4;
-	int mask = radix - 1;
-	char base = bupper ? 'A' : 'a';
+    const int radix = 1 << 4;
+    int mask = radix - 1;
+    char base = bupper ? 'A' : 'a';
 
-	do
-	{
-		int d = n & mask;
-		s[--charPos] = d < 10 ? '0' + d : base + (d - 10);
-		n >>= 4;
-	}while (0 != n);
+    do
+    {
+        int d = n & mask;
+        s[--charPos] = d < 10 ? '0' + d : base + (d - 10);
+        n >>= 4;
+    }while (0 != n);
 
-	return std::string(s, charPos, (size - charPos));
+    return std::string(s, charPos, (size - charPos));
 }
 
 template <typename T>
 inline // static
 std::string String::ToOctalString(T n)
 {
-	std::string s;
-	size_t size = sizeof(T) * 8;
-	s.resize(size);
-	std::string::size_type charPos = size;
+    std::string s;
+    size_t size = sizeof(T) * 8;
+    s.resize(size);
+    std::string::size_type charPos = size;
 
-	const int radix = 1 << 3;
-	int mask = radix - 1;
+    const int radix = 1 << 3;
+    int mask = radix - 1;
 
-	do
-	{
-		s[--charPos] = '0' + static_cast<int>(n & mask);
-		n >>= 3;
-	}while (0 != n);
+    do
+    {
+        s[--charPos] = '0' + static_cast<int>(n & mask);
+        n >>= 3;
+    }while (0 != n);
 
-	return std::string(s, charPos, (size - charPos));
+    return std::string(s, charPos, (size - charPos));
 }
 
 template <typename T>
 inline // static
 std::string String::ToBinaryString(T n)
 {
-	std::string s;
-	size_t size = sizeof(T) * 8;
-	s.resize(size);
-	std::string::size_type charPos = size;
+    std::string s;
+    size_t size = sizeof(T) * 8;
+    s.resize(size);
+    std::string::size_type charPos = size;
 
-	do
-	{
-		s[--charPos] = (n & 1) + '0';
-		n >>= 1;
-	}while (0 != n);
+    do
+    {
+        s[--charPos] = (n & 1) + '0';
+        n >>= 1;
+    }while (0 != n);
 
-	return std::string(s, charPos, (size - charPos));
+    return std::string(s, charPos, (size - charPos));
 }
 
 //
@@ -344,11 +324,11 @@ std::string String::ToBinaryString(T n)
 inline // static
 void String::Swap(unsigned char* lhs, unsigned char* rhs)
 {
-	//return std::swap(*lhs, *rhs);
+    //return std::swap(*lhs, *rhs);
 
-	unsigned char tmp = *lhs;
-	*lhs = *rhs;
-	*rhs = tmp;
+    unsigned char tmp = *lhs;
+    *lhs = *rhs;
+    *rhs = tmp;
 }
 
 //
@@ -357,21 +337,21 @@ void String::Swap(unsigned char* lhs, unsigned char* rhs)
 inline // static
 void String::ReverseBuffer(unsigned char* begin, unsigned char* end)
 {
-	//return std::reverse(begin, end);
+    //return std::reverse(begin, end);
 #if 0
-	for (; begin != end && begin != --end; ++begin)
-	{
-		//Swap(begin, end);
-		std::swap(*begin, *end);
-	}
+    for (; begin != end && begin != --end; ++begin)
+    {
+        //Swap(begin, end);
+        std::swap(*begin, *end);
+    }
 
 #else
 
-	while (begin < --end)
-	{
-		//Swap(begin++, end);
-		std::swap(*begin, *end);
-	}
+    while (begin < --end)
+    {
+        //Swap(begin++, end);
+        std::swap(*begin, *end);
+    }
 #endif
 }
 
@@ -379,28 +359,28 @@ template <typename OutIt>
 inline // static
 void String::HexDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 16*/)
 {
-	size_t offset = 0;
-	std::string line;
-	while (offset < size) 
-	{
-		offset += HexDumpLine(ptr, offset, size, line, linelength);
-		*out++ = line.c_str();
-		//*out++ = line;
-	}
+    size_t offset = 0;
+    std::string line;
+    while (offset < size) 
+    {
+        offset += HexDumpLine(ptr, offset, size, line, linelength);
+        *out++ = line.c_str();
+        //*out++ = line;
+    }
 }
 
 template <typename OutIt>
 inline // static
 void String::BinDump(const void* ptr, size_t size, OutIt out, size_t linelength/* = 8*/)
 {
-	size_t offset = 0;
-	std::string line;
-	while (offset < size) 
-	{
-		offset += BinDumpLine(ptr, offset, size, line, linelength);
-		*out++ = line.c_str();
-		//*out++ = line;
-	}
+    size_t offset = 0;
+    std::string line;
+    while (offset < size) 
+    {
+        offset += BinDumpLine(ptr, offset, size, line, linelength);
+        *out++ = line.c_str();
+        //*out++ = line;
+    }
 }
 
 //
@@ -506,67 +486,67 @@ UTIL_API bool IsDigit(char);
 
 //inline bool IsAlpha(char ch) 
 //{
-//	return 0 != isalpha(static_cast<unsigned char>(ch));
+//    return 0 != isalpha(static_cast<unsigned char>(ch));
 //}
 
 inline bool IsAlNum(char ch)
 {
-	return 0 != isalnum(static_cast<unsigned char>(ch));
+    return 0 != isalnum(static_cast<unsigned char>(ch));
 }
 
 //inline bool IsDigit(char ch) 
 //{
-//	return 0 != isdigit(static_cast<unsigned char>(ch));
+//    return 0 != isdigit(static_cast<unsigned char>(ch));
 //}
 
 inline bool IsLower(char ch) 
 {
-	return 0 != islower(static_cast<unsigned char>(ch));
+    return 0 != islower(static_cast<unsigned char>(ch));
 }
 
 inline bool IsSpace(char ch)
 {
-	return 0 != isspace(static_cast<unsigned char>(ch));
+    return 0 != isspace(static_cast<unsigned char>(ch));
 }
 
 inline bool IsUpper(char ch)
 {
-	return 0 != isupper(static_cast<unsigned char>(ch));
+    return 0 != isupper(static_cast<unsigned char>(ch));
 }
 
 inline bool IsXDigit(char ch)
 {
-	return 0 != isxdigit(static_cast<unsigned char>(ch));
+    return 0 != isxdigit(static_cast<unsigned char>(ch));
 }
 
 inline bool IsXDigit(wchar_t ch)
 {
-	const unsigned char low_byte = static_cast<unsigned char>(ch);
-	return ch == low_byte && 0 != isxdigit(low_byte);
+    const unsigned char low_byte = static_cast<unsigned char>(ch);
+    return ch == low_byte && 0 != isxdigit(low_byte);
 }
 
 inline char ToLower(char ch)
 {
-	return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+    return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
 }
 
 inline char ToUpper(char ch) 
 {
-	return static_cast<char>(toupper(static_cast<unsigned char>(ch)));
+    return static_cast<char>(toupper(static_cast<unsigned char>(ch)));
 }
 
 inline int DigitValue(char ch)
 {
-	unsigned char uc(static_cast<unsigned char>(ch));
-	return isdigit(uc) ? uc - '0' : -1;
+    unsigned char uc(static_cast<unsigned char>(ch));
+    return isdigit(uc) ? uc - '0' : -1;
 }
 
 inline int XDigitValue(char ch)
 {
-	unsigned char uc(static_cast<unsigned char>(ch));
-	return isxdigit(uc)
-		? (isdigit(uc) ? uc - '0' : toupper(uc) - 'A' + 10) 
-		: -1;
+    unsigned char uc(static_cast<unsigned char>(ch));
+    return isxdigit(uc)
+        ? (isdigit(uc) ? uc - '0' : toupper(uc) - 'A' + 10) 
+        : -1;
 }
 
 UTIL_END

@@ -10,7 +10,7 @@
 #define UTIL_CONFIG_H
 
 #ifndef NOMINMAX
-#	define NOMINMAX
+#    define NOMINMAX
 #endif
 
 #include <Build/BuildConfig.h>
@@ -21,18 +21,18 @@
 // Let's use these extensions with Util:
 //
 #ifdef  UTIL_API_EXPORTS
-#	define UTIL_API	DECLSPEC_EXPORT
+#    define UTIL_API    DECLSPEC_EXPORT
 #else
-#	define UTIL_API	DECLSPEC_IMPORT
+#    define UTIL_API    DECLSPEC_IMPORT
 #endif
 
 namespace UtilInternal
 {
 // TODO: Should not be inline, this is not performance critical.
 #ifdef _WIN32
-	inline int GetSystemErrno() { return GetLastError(); }
+    inline int GetSystemErrno() { return GetLastError(); }
 #else
-	inline int GetSystemErrno() { return errno; }
+    inline int GetSystemErrno() { return errno; }
 #endif
 }
 
@@ -40,25 +40,25 @@ namespace UtilInternal
 // NAMESPACE 
 //
 #if defined(__cplusplus)
-#	define UTIL_BEGIN			namespace Util {
-#	define UTIL_END				}
-#	define USING_UTIL			using namespace Util;
-#	define UTIL					::Util::
+#    define UTIL_BEGIN            namespace Util {
+#    define UTIL_END                }
+#    define USING_UTIL            using namespace Util;
+#    define UTIL                    ::Util::
 
-#	define UTILINTERNAL_BEGIN	namespace UtilInternal {
-#	define UTILINTERNAL_END		}
-#	define USING_UTILINTERNAL	using namespace UtilInternal;
-#	define UTILINTERNAL			::UtilInternal::
+#    define UTILINTERNAL_BEGIN    namespace UtilInternal {
+#    define UTILINTERNAL_END        }
+#    define USING_UTILINTERNAL    using namespace UtilInternal;
+#    define UTILINTERNAL            ::UtilInternal::
 
 #else // __cplusplus
 
-#	define UTIL_BEGIN
-#	define UTIL_END
-#	define UTIL
+#    define UTIL_BEGIN
+#    define UTIL_END
+#    define UTIL
 
-#	define UTILINTERNAL_BEGIN
-#	define UTILINTERNAL_END
-#	define UTILINTERNAL
+#    define UTILINTERNAL_BEGIN
+#    define UTILINTERNAL_END
+#    define UTILINTERNAL
 
 #endif // __cplusplus
 

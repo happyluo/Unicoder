@@ -84,26 +84,26 @@ static inline int atomicExchangeAdd(volatile int* counter, int i)
 
 
 Util::SimpleShared::SimpleShared() :
-	m_ref(0),
-	m_noDelete(false)
+    m_ref(0),
+    m_noDelete(false)
 {
 }
 
 Util::SimpleShared::SimpleShared(const SimpleShared&) :
-	m_ref(0),
-	m_noDelete(false)
+    m_ref(0),
+    m_noDelete(false)
 {
 }
 
 Util::Shared::Shared() :
-	m_ref(0),
-	m_noDelete(false)
+    m_ref(0),
+    m_noDelete(false)
 {
 }
 
 Util::Shared::Shared(const Shared& rhs) :
-	m_ref(0),
-	m_noDelete(false)
+    m_ref(0),
+    m_noDelete(false)
 {
 }
 
@@ -112,10 +112,10 @@ Util::Shared::IncRef()
 {
 #if defined(_WIN32)
     assert(InterlockedExchangeAdd(&m_ref, 0) >= 0);
-	if (InterlockedExchangeAdd(&m_ref, 0) >= 0)
-	{
-		InterlockedIncrement(&m_ref);
-	}
+    if (InterlockedExchangeAdd(&m_ref, 0) >= 0)
+    {
+        InterlockedIncrement(&m_ref);
+    }
 #elif defined(HAS_GCC_BUILTINS)
 
 #   ifndef NDEBUG
@@ -127,10 +127,10 @@ Util::Shared::IncRef()
     assert(UtilInternal::atomicExchangeAdd(&m_ref, 0) >= 0);
     UtilInternal::atomicInc(&m_ref);
 #else
-	m_mutex.Lock();
-	assert(m_ref >= 0);
-	++m_ref;
-	m_mutex.Unlock();
+    m_mutex.Lock();
+    assert(m_ref >= 0);
+    ++m_ref;
+    m_mutex.Unlock();
 #endif
 }
 
@@ -140,8 +140,8 @@ Util::Shared::DecRef()
 #if defined(_WIN32)
     assert(InterlockedExchangeAdd(&m_ref, 0) > 0);
     if (InterlockedExchangeAdd(&m_ref, 0) > 0
-		&& InterlockedDecrement(&m_ref) == 0 
-		&& !m_noDelete)
+        && InterlockedDecrement(&m_ref) == 0 
+        && !m_noDelete)
     {
         m_noDelete = true;
         delete this;
@@ -162,19 +162,19 @@ Util::Shared::DecRef()
         delete this;
     }
 #else
-	m_mutex.Lock();
-	bool doDelet = false;
-	assert(m_ref > 0);
-	if (0 == --m_ref)
-	{
-		doDelet = !m_noDelete;
-		m_noDelete = true;
-	}
-	m_mutex.Unlock();
-	if (doDelet)
-	{
-		delete this;
-	}
+    m_mutex.Lock();
+    bool doDelet = false;
+    assert(m_ref > 0);
+    if (0 == --m_ref)
+    {
+        doDelet = !m_noDelete;
+        m_noDelete = true;
+    }
+    m_mutex.Unlock();
+    if (doDelet)
+    {
+        delete this;
+    }
 #endif
 }
 
@@ -188,10 +188,10 @@ Util::Shared::GetRef() const
 #elif defined(HAS_ATOMIC_FUNCTIONS)
     return UtilInternal::atomicExchangeAdd(const_cast<volatile int*>(&m_ref), 0);
 #else
-	m_mutex.Lock();
-	int ret = m_ref;
-	m_mutex.Unlock();
-	return ret;
+    m_mutex.Lock();
+    int ret = m_ref;
+    m_mutex.Unlock();
+    return ret;
 #endif
 }
 

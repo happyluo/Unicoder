@@ -19,184 +19,184 @@ namespace Util
 //
 // LockT 和 TryLockT 是非递归的, 不可以对同一个Lock 或 TryLock对象重复获取(acquire)多次.
 // 
-#	ifdef LANG_CPP11
-#	include <Concurrency/Mutex.h>
+#    ifdef LANG_CPP11
+#    include <Concurrency/Mutex.h>
 
-template <typename T>		//	T= std::mutex || std::recursive_mutex
+template <typename T>        //    T= std::mutex || std::recursive_mutex
 class LockT : public noncopyable
 {
-	friend class Cond;
+    friend class Cond;
 
 public:
-	LockT(const T& mutex) 
-	try : m_mutex(mutex)
-	{
-	}  
-	catch(const std::system_error& ex)
-	{
-		throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
-	}
+    LockT(const T& mutex) 
+    try : m_mutex(mutex)
+    {
+    }  
+    catch(const std::system_error& ex)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
+    }
 
-	~LockT(void)
-	{
-	}
+    ~LockT(void)
+    {
+    }
 
-	void Acquire() const 
-	{
-		if (m_mutex)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    void Acquire() const 
+    {
+        if (m_mutex)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		try
-		{
-			m_mutex.lock();
-		}
-		catch(const std::system_error& ex)
-		{
-			//If there is no associated mutex, std::system_error with an error code of std::errc::operation_not_permitted.
-			//If the mutex is already locked, std::system_error with an error code of std::errc::resource_deadlock_would_occur.
-			throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
-		}
-	}
+        try
+        {
+            m_mutex.lock();
+        }
+        catch(const std::system_error& ex)
+        {
+            //If there is no associated mutex, std::system_error with an error code of std::errc::operation_not_permitted.
+            //If the mutex is already locked, std::system_error with an error code of std::errc::resource_deadlock_would_occur.
+            throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
+        }
+    }
 
-	bool TryAcquire() const
-	{
-		if (m_mutex)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    bool TryAcquire() const
+    {
+        if (m_mutex)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		try
-		{
-			return m_mutex.try_lock();
-		}
-		catch(const std::system_error& ex)
-		{
-			throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
-		}
-	}
+        try
+        {
+            return m_mutex.try_lock();
+        }
+        catch(const std::system_error& ex)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
+        }
+    }
 
-	void Release() const
-	{
-		if (!m_mutex)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    void Release() const
+    {
+        if (!m_mutex)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		try
-		{
-			m_mutex.unlock();
-		}
-		catch(const std::system_error& ex)
-		{
-			throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
-		}
-	}
+        try
+        {
+            m_mutex.unlock();
+        }
+        catch(const std::system_error& ex)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
+        }
+    }
 
-	bool Acquired() const
-	{
-		return m_mutex.owns_lock();
-	}
+    bool Acquired() const
+    {
+        return m_mutex.owns_lock();
+    }
 
 public:
 
-	// TryLockT's contructor
-	LockT(const T& mutex, bool)
-	try : m_mutex(mutex, std::try_to_lock)
-	{
-	}  
-	catch(const std::system_error& ex)
-	{
-		throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
-	}
+    // TryLockT's contructor
+    LockT(const T& mutex, bool)
+    try : m_mutex(mutex, std::try_to_lock)
+    {
+    }  
+    catch(const std::system_error& ex)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, ex.code().value());
+    }
 
 private:
-	const std::unique_lock<T::mutex_type>&	m_mutex;		//  Mutex::mutex_type || RecMutex::mutex_type
+    const std::unique_lock<T::mutex_type>&    m_mutex;        //  Mutex::mutex_type || RecMutex::mutex_type
 };
 
-#	else
+#    else
 
 template <typename T>
 class LockT : public noncopyable
 {
-	friend class Cond;
+    friend class Cond;
 
 public:
-	LockT(const T& mutex) : m_mutex(mutex)
-	{
-		m_mutex.Lock();
-		m_acquired = true;
-	}
+    LockT(const T& mutex) : m_mutex(mutex)
+    {
+        m_mutex.Lock();
+        m_acquired = true;
+    }
 
-	~LockT(void)
-	{
-		if (m_acquired)
-		{
-			m_mutex.Unlock();
-		}
-	}
+    ~LockT(void)
+    {
+        if (m_acquired)
+        {
+            m_mutex.Unlock();
+        }
+    }
 
-	void Acquire() const 
-	{
-		if (m_acquired)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    void Acquire() const 
+    {
+        if (m_acquired)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		m_mutex.Lock();
-		m_acquired = true;
-	}
+        m_mutex.Lock();
+        m_acquired = true;
+    }
 
-	bool TryAcquire() const
-	{
-		if (m_acquired)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    bool TryAcquire() const
+    {
+        if (m_acquired)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		m_acquired = m_mutex.TryLock();
-		return m_acquired;
-	}
+        m_acquired = m_mutex.TryLock();
+        return m_acquired;
+    }
 
-	void Release() const
-	{
-		if (!m_acquired)
-		{
-			throw ThreadLockedException(__FILE__, __LINE__);
-		}
+    void Release() const
+    {
+        if (!m_acquired)
+        {
+            throw ThreadLockedException(__FILE__, __LINE__);
+        }
 
-		m_mutex.Unlock();
-		m_acquired = false;
-	}
+        m_mutex.Unlock();
+        m_acquired = false;
+    }
 
-	bool Acquired() const
-	{
-		return m_acquired;
-	}
+    bool Acquired() const
+    {
+        return m_acquired;
+    }
 
 protected:
 
-	// TryLockT's contructor
-	LockT(const T& mutex, bool) : m_mutex(mutex)
-	{
-		m_acquired = m_mutex.TryLock();
-	}
+    // TryLockT's contructor
+    LockT(const T& mutex, bool) : m_mutex(mutex)
+    {
+        m_acquired = m_mutex.TryLock();
+    }
 
 private:
-	const T&	m_mutex;
-	mutable bool	m_acquired;
+    const T&    m_mutex;
+    mutable bool    m_acquired;
 };
 
-#	endif
+#    endif
 
 template <typename T>
 class TryLockT : public LockT<T>
 {
 public:
-	TryLockT(const T& mutex) : LockT<T>(mutex, true)
-	{
-	}
+    TryLockT(const T& mutex) : LockT<T>(mutex, true)
+    {
+    }
 };
 
 }
